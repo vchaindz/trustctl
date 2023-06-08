@@ -37,6 +37,7 @@ def raw():
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
     print(response.text)
+    return 
 
 @click.command()
 def listprojects():
@@ -58,7 +59,7 @@ def listprojects():
         table.add_row([name, version, classifier, uuid])
     
     print(table)
-
+    return
 
 @click.command()
 @click.argument('imagedigest')
@@ -67,20 +68,20 @@ def projectidbydigest(imagedigest):
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
     data = response.json()
+    # Create a table with headers
+    table = PrettyTable()
+    table.field_names = ["Name", "Version", "UUID", "Digest"]
+
     for project in data:
         for prop in project.get('properties', []):
             if prop.get('propertyName') == 'imagedigest' and prop.get('propertyValue') == imagedigest:
                 uuid = project.get('uuid')
                 name = project.get('name')
                 version = project.get('version')
-                # Create a table with headers
-                table = PrettyTable()
-                table.field_names = ["Name", "Version", "UUID", "Digest"]
                 table.add_row([name, version, uuid, imagedigest])
 
-                print(table)
-                return
-
+    print(table)
+    return
 
 @click.command()
 @click.argument('image')
@@ -95,8 +96,6 @@ def getimagedigest(image):
 
     print(table)
     return
-
-
 
 @click.command()
 @click.argument('uuid')
@@ -121,7 +120,7 @@ def projectsetdigest(uuid,image):
     create = requests.put(urlpost, headers=headers, json=data, verify=False)
     update = requests.post(urlpost, headers=headers, json=data, verify=False)
 
-    print("image " + image + " with unique config digest " + imagedigest.stdout.strip('\n') + " has been added to project " + uuid)
+    print("Image " + image + " with digest " + imagedigest.stdout.strip('\n') + " has been added to project " + uuid)
     return
 
 @click.command()
@@ -130,8 +129,29 @@ def projectdetails(project_id):
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project/" + project_id, headers=headers, verify=False)
-    print(response.text)
 
+    # Parse the JSON response
+    data = json.loads(response.text)
+
+    # Extract the desired fields
+    name = data.get('name', 'N/A')
+    version = data.get('version', 'N/A')
+    classifier = data.get('classifier', 'N/A')
+    uuid = data.get('uuid', 'N/A')
+    properties = data.get('properties', [{}])
+
+    # Initialize the pretty table
+    table = PrettyTable()
+    table.field_names = ["Name", "Version", "Classifier", "UUID", "PropertyValue"]
+
+    # Loop through the properties and add rows to the table
+    for prop in properties:
+        property_value = prop.get('propertyValue', 'N/A')
+        table.add_row([name, version, classifier, uuid, property_value])
+
+    # Print the table
+    print(table)
+    return
 
 @click.command()
 @click.argument('imagedigest')
@@ -168,20 +188,31 @@ def authenticatedigest(imagedigest):
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
     data = response.json()
+
+    # Initialize the pretty table
+    table = PrettyTable()
+    table.field_names = ["Name", "Version", "UUID", "Digest", "Trustlevel"]
+
     for project in data:
         for prop in project.get('properties', []):
             if prop.get('propertyName') == 'imagedigest' and prop.get('propertyValue') == imagedigest:
                 uuid = project.get('uuid')
+                name = project.get('name')
+                version = project.get('version')
                 data = [{"uuid": uuid}]
                 headers = {
                     "Content-Type": "application/json",
                     "X-API-Key": api_key
                 }
                 urlpost = url + "/api/v1/integrations/trustcenter/trustlevel"
-    response = requests.post(urlpost, headers=headers, json=data, verify=False)
-    trustlevel = json.loads(response.text)
-    trustlevel = trustlevel[0]['trustlevel']
-    print("Image with digest " + imagedigest + " has the following trustlevel " + trustlevel)
+                response = requests.post(urlpost, headers=headers, json=data, verify=False)
+                trustlevel = json.loads(response.text)
+                trustlevel = trustlevel[0]['trustlevel']
+                table.add_row([name, version, uuid, imagedigest, trustlevel])
+
+    # Print the table
+    print(table)
+
     return
 
 
