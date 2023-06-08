@@ -1,3 +1,6 @@
+rename and change config.example to config.json or use env variables URL and API_KEY
+
+
 **Usage**: `trustctl.py [OPTIONS] COMMAND [ARGS]..`.
 
 **Options**:
