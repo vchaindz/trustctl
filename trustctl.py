@@ -223,7 +223,7 @@ def authenticatedigest(imagedigest, code):
                 code_to_return = trustlevel_code.get(trustlevel.upper(), -1)
  		# If the --code flag is set, return the code
                 if code:
-                   print(code_to_return)
+                   print(uuid+","+name+","+imagedigest+","+trustlevel+",",code_to_return)
     
     # Print the table
     if not code:
