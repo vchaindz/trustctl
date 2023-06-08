@@ -180,10 +180,10 @@ def notarizedigest(imagedigest):
                 print("Image with digest " + imagedigest + " has been trusted")
                 return
 
-
 @click.command()
 @click.argument('imagedigest')
-def authenticatedigest(imagedigest):
+@click.option('--code', is_flag=True, default=False, help='Return a code based on the trustlevel.')
+def authenticatedigest(imagedigest, code):
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
@@ -192,6 +192,15 @@ def authenticatedigest(imagedigest):
     # Initialize the pretty table
     table = PrettyTable()
     table.field_names = ["Name", "Version", "UUID", "Digest", "Trustlevel"]
+
+    trustlevel_code = {
+        "TRUSTED": 0,
+        "UNTRUSTED": 1,
+        "NOT NOTARIZED": 2,
+        "UNSUPPORTED": 3,
+    }
+
+    code_to_return = -1  # Default code if no project matches the imagedigest
 
     for project in data:
         for prop in project.get('properties', []):
@@ -210,10 +219,18 @@ def authenticatedigest(imagedigest):
                 trustlevel = trustlevel[0]['trustlevel']
                 table.add_row([name, version, uuid, imagedigest, trustlevel])
 
+                # Update the code to return based on the trustlevel
+                code_to_return = trustlevel_code.get(trustlevel.upper(), -1)
+ 		# If the --code flag is set, return the code
+                if code:
+                   print(code_to_return)
+    
     # Print the table
-    print(table)
+    if not code:
+       print(table)
 
     return
+
 
 
 cli.add_command(raw)
