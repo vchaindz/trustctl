@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+## Author: vchaindz
+## Company: Codenotary, Inc
+## Version: 0.1
+
 import click
 import json
 import requests
