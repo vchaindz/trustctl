@@ -255,6 +255,30 @@ def authenticatedigest(imagedigest, code):
 
     return
 
+@click.command()
+@click.argument('project_id')
+@click.option('--trustlevel', required=True, type=int)
+def authenticateproject(imagedigest, trustlevel):
+    url, api_key = load_config()
+
+    trustlevel_code = {
+        "TRUSTED": 0,
+        "UNTRUSTED": 1,
+        "NOT NOTARIZED": 2,
+        "UNSUPPORTED": 3,
+    }
+    headers = {
+               "Content-Type": "application/json",
+               "X-API-Key": api_key
+    }
+    urlpost = url + "/api/v1/integrations/trustcenter/trustlevel"
+    response = requests.post(urlpost, headers=headers, json=data, verify=False)
+    trustlevel = json.loads(response.text)
+    trustlevel = trustlevel[0]['trustlevel']
+
+    print(uuid+","+name+","+trustlevel+",",code_to_return)
+
+    return
 
 
 cli.add_command(raw)
@@ -266,6 +290,7 @@ cli.add_command(projectsetdigest)
 cli.add_command(notarizedigest)
 cli.add_command(notarizeproject)
 cli.add_command(authenticatedigest)
+cli.add_command(authenticateproject)
 
 if __name__ == '__main__':
     cli()
