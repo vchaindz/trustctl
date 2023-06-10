@@ -258,7 +258,7 @@ def authenticatedigest(imagedigest, code):
 @click.command()
 @click.argument('project_id')
 @click.option('--trustlevel', required=True, type=int)
-def authenticateproject(imagedigest, trustlevel):
+def authenticateproject(project_id, trustlevel):
     url, api_key = load_config()
 
     trustlevel_code = {
@@ -272,11 +272,16 @@ def authenticateproject(imagedigest, trustlevel):
                "X-API-Key": api_key
     }
     urlpost = url + "/api/v1/integrations/trustcenter/trustlevel"
+    data = [{"uuid": project_id}]
     response = requests.post(urlpost, headers=headers, json=data, verify=False)
-    trustlevel = json.loads(response.text)
-    trustlevel = trustlevel[0]['trustlevel']
-
-    print(uuid+","+name+","+trustlevel+",",code_to_return)
+    realtrustlevel = json.loads(response.text)
+    realtrustlevel = realtrustlevel[0]['trustlevel']
+    # Update the code to return based on the trustlevel
+    code_to_return = trustlevel_code.get(realtrustlevel.upper(), -1)
+    if trustlevel == code_to_return:
+       print("true")
+    else:
+       print("false")
 
     return
 
