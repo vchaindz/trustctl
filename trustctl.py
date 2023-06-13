@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/local/bin/python
 
 ## Author: vchaindz
 ## Company: Codenotary, Inc

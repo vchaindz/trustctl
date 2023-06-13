@@ -1,0 +1,28 @@
+# To do list 
+
+## Trustctl script
+
+- import code from GitLab into a project (private), return UUID of the project
+- create SBOM for source code projects
+
+- function to create new project in TC/Teams
+- function to create SBOM for image
+- function to import SBOM of image to the project, wait for vulnerability scan to end
+ 
+- function to return summary of vulnerabilities (severe=x, high=y...)
+- function to return risk score
+
+## GitLab pipeline
+
+- compare summary of vulnerabilities before and after new scan/deploy and alert about new vulnerability
+- deny deployment of non compliant images
+
+## Other Qs
+
+- TC Teams architecture - which databases it stores information in
+- How is the information (metadata, project details) in TC Teams protected from tampering
+- What are examples of policies (conditions upon which notarization is allowed); 
+is there a default setting/set of conditions others are using; generally what are the set of conditions used in other companies
+eg. 1 critical vulnerability
+- Create a list of possible policies (eg. what goes into manual review)
+- Is it possible to see on FE the tlevel of subproject?
