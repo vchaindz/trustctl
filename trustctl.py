@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 
 ## Author: vchaindz
 ## Company: Codenotary, Inc
@@ -33,6 +33,7 @@ def cli():
 
 @click.command()
 def raw():
+    """Returns a raw digest. Can be used for pinging the instance"""
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
@@ -40,10 +41,14 @@ def raw():
     return 
 
 @click.command()
-def listprojects():
+@click.option('--perpage', default=100, help='Number of items per page')
+@click.option('--page', default=1, help='Page number')
+def listprojects(perpage, page):
+    """Prints a list of all or part of projects"""
     url, api_key = load_config()
-    headers = {'X-Api-Key': api_key}
-    response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
+    headers = {'Content-Type': 'application/json', 'X-Api-Key': api_key}
+    getprojecturl = url + "/api/v1/project?pageSize=" + str(perpage) + "&pageNumber=" + str(page)
+    response = requests.get(getprojecturl, headers=headers, verify=False)
     data = json.loads(response.text)
     
     # Create a table with headers
@@ -64,6 +69,7 @@ def listprojects():
 @click.command()
 @click.argument('imagedigest')
 def projectidbydigest(imagedigest):
+    """Prints the project UUID and name by digest. The argument is the digest of the image."""
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
@@ -86,6 +92,7 @@ def projectidbydigest(imagedigest):
 @click.command()
 @click.argument('image')
 def getimagedigest(image):
+    """Prints the digest of an image read from Docker. The argument is the image name."""
     command = "regctl image digest " + image
     imagedigest = subprocess.run(command, shell=True, capture_output=True, text=True)
 
@@ -101,6 +108,7 @@ def getimagedigest(image):
 @click.argument('uuid')
 @click.argument('image')
 def projectsetdigest(uuid,image):
+    """Sets the digest of an image to a project. The arguments are the project UUID and the image name."""
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     command = "regctl image digest " + image
@@ -126,6 +134,7 @@ def projectsetdigest(uuid,image):
 @click.command()
 @click.argument('project_id')
 def projectdetails(project_id):
+    """Prints the details of a project. The argument is the project UUID."""
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project/" + project_id, headers=headers, verify=False)
@@ -156,6 +165,7 @@ def projectdetails(project_id):
 @click.command()
 @click.argument('imagedigest')
 def notarizedigest(imagedigest):
+    """Notarize a digest. The argument is the digest of the image."""
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
@@ -184,6 +194,11 @@ def notarizedigest(imagedigest):
 @click.argument('project_id')
 @click.option('--trustlevel', required=True, type=int)
 def notarizeproject(project_id,trustlevel):
+    """Notarize a project. The arguments are the project UUID and the trustlevel. Possible values are: 
+0 - Trusted
+1 - Untrusted
+2 - Not notarized
+3 - Unsupported"""
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     data = {
@@ -208,6 +223,7 @@ def notarizeproject(project_id,trustlevel):
 @click.argument('imagedigest')
 @click.option('--code', is_flag=True, default=False, help='Return a code based on the trustlevel.')
 def authenticatedigest(imagedigest, code):
+    """Print the trustlevel - authenticate a digest. The argument is the digest of the image."""
     url, api_key = load_config()
     headers = {'X-Api-Key': api_key}
     response = requests.get(url + "/api/v1/project", headers=headers, verify=False)
@@ -259,6 +275,7 @@ def authenticatedigest(imagedigest, code):
 @click.argument('project_id')
 @click.option('--trustlevel', required=True, type=int)
 def authenticateproject(project_id, trustlevel):
+    """Print the trustlevel of a project = authenticate a project. The arguments are the project UUID and the trustlevel."""
     url, api_key = load_config()
 
     trustlevel_code = {
