@@ -7,4 +7,4 @@ COPY regctl /usr/bin/regctl
 RUN pip3 install -r requirements.txt
 COPY trustctl.py trustctl.py
 
-ENTRYPOINT [ "python3", "trustctl.py" ]
+ENTRYPOINT [ "python", "trustctl.py" ]
